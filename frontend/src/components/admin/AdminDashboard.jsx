@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
-import { AuthContext } from '../auth/AuthContext';
+import { AuthContext } from '../customer/auth/AuthContext';
 
 function AdminDashboard() {
   const { logout, token } = useContext(AuthContext);

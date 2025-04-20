@@ -1,11 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@assets/images/logo.png";
 
 function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [user, setUser] = useState(null);
   const location = useLocation();
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Check for user data in localStorage on component mount
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      try {
+        setUser(JSON.parse(storedUser));
+      } catch (error) {
+        console.error("Error parsing user data:", error);
+      }
+    }
+  }, []);
 
   const navItems = [
     { name: "Home", path: "/" },
@@ -52,7 +65,7 @@ function NavBar() {
             ))}
           </div>
 
-          {/* Desktop Profile/Login */}
+          {/* Desktop Profile/Username */}
           <div className="hidden md:flex items-center space-x-5">
             <Link
               to="/profile"
@@ -74,12 +87,21 @@ function NavBar() {
                 />
               </svg>
             </Link>
-            <Link
-              to="/login"
-              className="bg-blue-600 text-white px-5 py-2 rounded-full font-medium hover:bg-blue-700 transition duration-300 shadow-md"
-            >
-              Login
-            </Link>
+            {user ? (
+              <Link
+                to="/profile"
+                className="text-gray-600 font-medium text-md hover:text-blue-600 transition-all duration-300"
+              >
+                {user.username}
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-600 text-white px-5 py-2 rounded-full font-medium hover:bg-blue-700 transition duration-300 shadow-md"
+              >
+                Login
+              </Link>
+            )}
           </div>
 
           {/* Mobile Hamburger */}
@@ -140,7 +162,7 @@ function NavBar() {
                 className="w-6 h-6"
                 fill="none"
                 stroke="currentColor"
-                viewBox="0 0 24 24"
+                viewBox="0 24"
               >
                 <path
                   strokeLinecap="round"
@@ -150,13 +172,23 @@ function NavBar() {
                 />
               </svg>
             </Link>
-            <Link
-              to="/login"
-              className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition duration-300 shadow"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Login
-            </Link>
+            {user ? (
+              <Link
+                to="/profile"
+                className="text-gray-600 font-medium text-lg hover:text-blue-600 transition-colors duration-200"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                {user.username}
+              </Link>
+            ) : (
+              <Link
+                to="/login"
+                className="bg-blue-600 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-700 transition duration-300 shadow"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Login
+              </Link>
+            )}
           </div>
         </div>
       </div>

@@ -65,17 +65,18 @@
 
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { AuthProvider } from "./components/auth/AuthContext";
+import { AuthProvider } from "./components/customer/auth/AuthContext";
 import NavBar from "./components/NavBar";
 import Footer from './components/Footer/Footer';
 import Homepage from "./components/pages/Home/HomePage";
 import AboutPage from "./components/pages/About/about";
-import { LoginPage, SignupPage } from "./components/auth/AuthPages";
+import { LoginPage, SignupPage } from "./components/customer/auth/AuthPages";
 import ProductPage from "./components/pages/Product/AllProduct";
 import AdminDashboard from "./components/admin/AdminDashboard";
 import CustomerDashboard from "./components/customer/CustomerDashboard";
 import SupervisorDashboard from "./components/supervisor/SupervisorDashboard";
 import SellerDashboard from "./components/seller/SellerDashboard";
+import ChangePasswordForm from "./components/setttings/setting";
 
 function App() {
   return (
@@ -91,6 +92,7 @@ function App() {
         <Route path="/customer" element={<CustomerDashboard />} />
         <Route path="/supervisor" element={<SupervisorDashboard />} />
         <Route path="/seller" element={<SellerDashboard />} />
+        <Route path="/settings" element={<ChangePasswordForm />} />
       </Routes>
       <Footer />
     </AuthProvider>

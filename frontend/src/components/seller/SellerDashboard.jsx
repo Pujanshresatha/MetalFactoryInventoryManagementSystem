@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { AuthContext } from '../auth/AuthContext';
+import { AuthContext } from '../customer/auth/AuthContext';
 // import NavBar from '../NavBar';
 
 export default function SellerDashboard() {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import axios from 'axios';
 import { LineChart, XAxis, YAxis, Tooltip, Legend, Line } from 'recharts';
-import { AuthContext } from '../auth/AuthContext';
+import { AuthContext } from '../customer/auth/AuthContext';
 
 function OwnerDashboard() {
   const { logout, token } = useContext(AuthContext);

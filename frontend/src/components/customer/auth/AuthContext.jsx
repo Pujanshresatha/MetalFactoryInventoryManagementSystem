@@ -60,6 +60,11 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
+   // New method to handle password change
+   const handlePasswordChange = () => {
+    logout(); // Force logout to invalidate token
+  };
+
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>
       {children}

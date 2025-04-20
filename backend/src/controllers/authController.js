@@ -62,3 +62,50 @@ export const login = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+export const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId; // Extracted from JWT middleware
+  
+    try {
+      // Validate input
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Current and new passwords are required' });
+      }
+  
+      // Find the user
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Verify current password
+      const isMatch = await bcrypt.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+  
+      // Validate new password
+      if (newPassword.length < 8) {
+        return res.status(400).json({ message: 'New password must be at least 8 characters' });
+      }
+  
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+  
+      // Update user's password
+      user.password = hashedPassword;
+      const updatedUser = await user.save();
+  
+      // Verify the update
+      if (updatedUser.password !== hashedPassword) {
+        return res.status(500).json({ message: 'Failed to update password' });
+      }
+  
+      console.log(`Password updated for user ${userId}`);
+      res.status(200).json({ message: 'Password changed successfully' });
+    } catch (error) {
+      console.error('Change password error:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
