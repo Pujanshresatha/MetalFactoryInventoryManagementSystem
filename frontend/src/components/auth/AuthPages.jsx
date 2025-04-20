@@ -37,14 +37,19 @@ export function LoginPage() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    role: 'customer',
+    role: 'Customer',
   });
+  const [error, setError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await login(formData.email, formData.password, formData.role);
+    setError('');
+    const result = await login(formData.email, formData.password, formData.role);
+    if (!result.success) {
+      setError(result.message);
+    }
   };
 
   return (
@@ -52,6 +57,7 @@ export function LoginPage() {
       <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
         <h1 className="text-4xl font-extrabold text-center mb-2 text-blue-800">Metal Factory</h1>
         <h2 className="text-lg font-medium text-center mb-6 text-gray-600">Welcome Back! Please login.</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-5">
           <InputField
             type="email"
@@ -72,9 +78,10 @@ export function LoginPage() {
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           >
-            <option value="customer">Customer</option>
-            <option value="admin">Admin</option>
-            <option value="owner">Owner</option>
+            <option value="Customer">Customer</option>
+            <option value="Admin">Admin</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Seller">Seller</option>
           </select>
           <button
             type="submit"
@@ -101,23 +108,28 @@ export function SignupPage() {
   const { register } = context;
 
   const [formData, setFormData] = useState({
-    name: '',
+    username: '',
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'customer',
+    role: 'Customer',
   });
+  const [error, setError] = useState('');
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match');
       return;
     }
-    await register(formData.name, formData.email, formData.password, formData.role);
+    const result = await register(formData.username, formData.email, formData.password, formData.role);
+    if (!result.success) {
+      setError(result.message);
+    }
   };
 
   return (
@@ -125,12 +137,13 @@ export function SignupPage() {
       <div className="bg-white p-10 rounded-3xl shadow-2xl w-full max-w-md">
         <h1 className="text-4xl font-extrabold text-center mb-2 text-blue-800">Metal Factory</h1>
         <h2 className="text-lg font-medium text-center mb-6 text-gray-600">Create your account</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-5">
           <InputField
             type="text"
-            placeholder="Full Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="Username"
+            value={formData.username}
+            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
           />
           <InputField
             type="email"
@@ -159,9 +172,10 @@ export function SignupPage() {
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
           >
-            <option value="customer">Customer</option>
-            <option value="admin">Admin</option>
-            <option value="owner">Owner</option>
+            <option value="Customer">Customer</option>
+            <option value="Admin">Admin</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Seller">Seller</option>
           </select>
           <button
             type="submit"
