@@ -77,10 +77,13 @@ import CustomerDashboard from "./components/customer/CustomerDashboard";
 import SupervisorDashboard from "./components/supervisor/SupervisorDashboard";
 import SellerDashboard from "./components/seller/SellerDashboard";
 import ChangePasswordForm from "./components/setttings/setting";
+import Cart from './components/cart/cart';
+import { CartProvider } from './components/cart/CartContext';
 
 function App() {
   return (
     <AuthProvider>
+   <CartProvider>
       <NavBar />
       <Routes>
         <Route path="/" element={<Homepage />} />
@@ -93,8 +96,10 @@ function App() {
         <Route path="/supervisor" element={<SupervisorDashboard />} />
         <Route path="/seller" element={<SellerDashboard />} />
         <Route path="/settings" element={<ChangePasswordForm />} />
+        <Route path="/cart" element={<Cart/>} />
       </Routes>
       <Footer />
+    </CartProvider>
     </AuthProvider>
   );
 }
