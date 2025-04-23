@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+// import errorResponse from '../utils/errorResponse.js';
 import { errorResponse } from '../utils/errorHandler.js';
 
 export const protect = async (req, res, next) => {

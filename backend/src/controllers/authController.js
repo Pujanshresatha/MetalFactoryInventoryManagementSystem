@@ -4,9 +4,14 @@ import User from '../models/User.js';
 
 export const signup = async (req, res) => {
   const { username, email, password, role } = req.body;
-
+  console.log('Received signup request:', req.body);    
   try {
-    if (!['Customer', 'Admin', 'Supervisor', 'Seller'].includes(role)) {
+
+    if (!username || !email || !password || !role) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    if (role !== 'Customer' && role !== 'Admin' && role !== 'Supervisor' && role !== 'Seller') {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
@@ -17,14 +22,22 @@ export const signup = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({ username, email, password: hashedPassword, role });
-    await user.save();
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: '1h',
-    });
+    console.log('Saving user...');
+    await user.save();
+    console.log('User saved!');
+
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    console.log('Token generated:', token);
 
     res.status(201).json({ token, _id: user._id, username, email, role });
   } catch (error) {
+    console.error('Signup error:', error);
     res.status(500).json({ message: 'Server error' });
   }
 };
@@ -59,7 +72,13 @@ export const login = async (req, res) => {
 
     res.json({ token, _id: user._id, username: user.username, email, role: user.role });
   } catch (error) {
-    res.status(500).json({ message: 'Server error' });
+    // Log detailed error
+    console.error('Signup error:', {
+      message: error.message,
+      stack: error.stack,
+      requestBody: req.body,
+    });
+    res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
 

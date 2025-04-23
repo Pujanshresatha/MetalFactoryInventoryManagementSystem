@@ -1,10 +1,10 @@
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 export const AuthContext = createContext();
 
-const API = import.meta.env.VITE_API_BASE_URL;
+const API = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
@@ -38,6 +38,7 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password, role) => {
     try {
+      console.log('Registering user with payload:', { username, email, password, role });
       const res = await axios.post(`${API}/auth/signup`, { username, email, password, role });
       const { token, ...userData } = res.data;
       setUser(userData);
@@ -47,7 +48,11 @@ export const AuthProvider = ({ children }) => {
       navigate(`/${role.toLowerCase()}`);
       return { success: true };
     } catch (err) {
-      console.error('Registration error:', err.response?.data || err.message);
+      console.error('Registration error:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      });
       return { success: false, message: err.response?.data?.message || 'Registration failed' };
     }
   };
@@ -60,14 +65,23 @@ export const AuthProvider = ({ children }) => {
     navigate('/login');
   };
 
-   // New method to handle password change
-   const handlePasswordChange = () => {
+  // New method to handle password change
+  const handlePasswordChange = () => {
     logout(); // Force logout to invalidate token
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, handlePasswordChange }}>
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Custom hook to use AuthContext
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

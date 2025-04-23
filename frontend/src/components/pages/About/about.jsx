@@ -77,7 +77,7 @@ const AboutPage = () => {
       <section className="py-20 bg-gray-100 mt-10">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-4xl font-bold text-center text-gray-800 mb-12">
-            Why Choose InventoryPro?
+            Why Choose Metal Factory?
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             {features.map((feature, index) => (
