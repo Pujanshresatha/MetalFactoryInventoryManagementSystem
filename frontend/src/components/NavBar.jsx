@@ -1,37 +1,38 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { useAuth } from "./customer/auth/AuthContext"; // Import the AuthContext
-import { useCart } from "./cart/CartContext"; // Import the cart context
+import { useAuth } from "./users/auth/AuthContext";
+import { useCart } from "./customer/CartContext";
 import logo from "@assets/images/logo.png";
-import { Import } from "lucide-react";
 
 function NavBar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth(); // Get user from AuthContext
+  const { user } = useAuth();
+  const { cartCount } = useCart();
   const location = useLocation();
-  const { cartCount } = useCart(); // Get cart count from context
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Define navItems based on user role
   const getNavItems = () => {
     if (!user) {
-      // Default for non-logged-in users (same as Customer)
       return [
         { name: "Home", path: "/" },
         { name: "All Product", path: "/allproducts" },
-        {
-          name: "MyCart",
-          path: "/cart",
-          badge: cartCount > 0 ? cartCount : null,
-        },
-        { name: "OrderHistory", path: "/OrderHistory" },
+        { name: "MyCart", path: "/cart", badge: cartCount > 0 ? cartCount : null },
+        { name: "Order History", path: "/customer/order-history" },
         { name: "Settings", path: "/settings" },
         { name: "About us", path: "/aboutus" },
       ];
     }
 
     switch (user.role.toLowerCase()) {
+      case "admin":
+        return [
+          { name: "Dashboard", path: "/admin/dashboard" },
+          { name: "Manage Products", path: "/admin/manage-products" },
+          { name: "Manage Orders", path: "/admin/manage-orders" },
+          { name: "Manage Users", path: "/admin/manage-users" },
+          { name: "Settings", path: "/settings" },
+        ];
       case "seller":
         return [
           { name: "Dashboard", path: "/seller/dashboard" },
@@ -51,12 +52,8 @@ function NavBar() {
         return [
           { name: "Home", path: "/" },
           { name: "All Product", path: "/allproducts" },
-          {
-            name: "MyCart",
-            path: "/cart",
-            badge: cartCount > 0 ? cartCount : null,
-          },
-          { name: "OrderHistory", path: "/OrderHistory" },
+          { name: "MyCart", path: "/cart", badge: cartCount > 0 ? cartCount : null },
+          { name: "Order History", path: "/customer/order-history" },
           { name: "Settings", path: "/settings" },
           { name: "About us", path: "/aboutus" },
         ];
@@ -70,7 +67,7 @@ function NavBar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex justify-between items-center">
           {/* Logo + Brand */}
-          <Link to="/" className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2">
             <img
               src={logo}
               alt="InventoryPro Logo"
@@ -79,7 +76,7 @@ function NavBar() {
             <span className="text-2xl font-semibold text-blue-700 tracking-tight">
               Metal Factory
             </span>
-          </Link>
+          </div>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -111,7 +108,7 @@ function NavBar() {
           {/* Desktop Profile/Username */}
           <div className="hidden md:flex items-center space-x-5">
             <Link
-              to="/profile"
+              to="/customer/profile"
               className="text-gray-600 hover:text-blue-600 transition-colors duration-300"
               aria-label="Profile"
             >
@@ -132,7 +129,7 @@ function NavBar() {
             </Link>
             {user ? (
               <Link
-                to="/profile"
+                to="/customer/profile"
                 className="text-gray-600 font-medium text-md hover:text-blue-600 transition-all duration-300"
               >
                 {user.username}
@@ -203,7 +200,7 @@ function NavBar() {
               </Link>
             ))}
             <Link
-              to="/profile"
+              to="/customer/profile"
               onClick={() => setIsMenuOpen(false)}
               className="text-gray-600 hover:text-blue-600"
               aria-label="Profile"
@@ -224,7 +221,7 @@ function NavBar() {
             </Link>
             {user ? (
               <Link
-                to="/profile"
+                to="/customer/profile"
                 className="text-gray-600 font-medium text-lg hover:text-blue-600 transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >

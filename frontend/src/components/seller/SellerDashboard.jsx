@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../customer/auth/AuthContext';
+import { useAuth } from '../users/auth/AuthContext';
 import { Plus, Eye } from 'lucide-react';
 
 const SellerDashboard = () => {
@@ -12,7 +12,7 @@ const SellerDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api';
+  const API_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
   // Redirect non-sellers or unauthenticated users
   useEffect(() => {
@@ -29,39 +29,91 @@ const SellerDashboard = () => {
       if (!user) return;
 
       setLoading(true);
+      setError(null);
+
       try {
         const token = localStorage.getItem('token');
-
-        // Stats fetch
-        const statsRes = await fetch(`${API_URL}/seller/stats`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (statsRes.status === 401) {
+        if (!token) {
           logout();
+          navigate('/login');
           return;
         }
 
-        if (!statsRes.ok) throw new Error('Failed to fetch stats');
-        const statsData = await statsRes.json();
-        setStats(statsData);
+        // Fetch products
+        let productCount = 0;
+        try {
+          const productsRes = await fetch(`${API_URL}/admin/products`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        // Orders fetch
-        const ordersRes = await fetch(`${API_URL}/orders?sellerId=${user._id}&limit=5`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+          if (productsRes.status === 401) {
+            logout();
+            navigate('/login');
+            return;
+          }
+          if (productsRes.status === 403) {
+            setError('Access denied: Seller permissions required');
+            setLoading(false);
+            return;
+          }
+          if (!productsRes.ok) {
+            throw new Error('Failed to fetch products');
+          }
 
-        if (ordersRes.status === 401) {
-          logout();
-          return;
+          const productsData = await productsRes.json();
+          // console.log('Products response:', productsData);
+          productCount = productsData.count || (Array.isArray(productsData) ? productsData.length : 0);
+          // console.log('Calculated productCount:', productCount);
+        } catch (err) {
+          console.error('Products fetch error:', err.message);
+          setError('Failed to load products. Please try again.');
         }
 
-        if (!ordersRes.ok) throw new Error('Failed to fetch orders');
-        const ordersData = await ordersRes.json();
+        // Fetch orders
+        let ordersData = [];
+        let totalRevenue = 0;
+        try {
+          const ordersRes = await fetch(`${API_URL}/orders?sellerId=${user._id}&limit=5`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          if (ordersRes.status === 401) {
+            logout();
+            navigate('/login');
+            return;
+          }
+          if (ordersRes.status === 403) {
+            setError('Access denied: Seller permissions required');
+            setLoading(false);
+            return;
+          }
+          if (!ordersRes.ok) {
+            throw new Error('Failed to fetch orders');
+          }
+
+          ordersData = await ordersRes.json();
+          console.log('Orders response:', ordersData);
+          totalRevenue = ordersData.reduce(
+            (sum, order) => sum + (order.totalAmount || 0),
+            0
+          );
+          console.log('Calculated totalRevenue:', totalRevenue);
+        } catch (err) {
+          console.error('Orders fetch error:', err.message);
+          setError((prev) => prev || 'Failed to load orders. Please try again.');
+        }
+
+        // Update stats
+        const newStats = {
+          totalProducts: productCount,
+          totalOrders: ordersData.length,
+          totalRevenue: totalRevenue,
+        };
+        console.log('Setting stats:', newStats);
+        setStats(newStats);
         setRecentOrders(ordersData);
-        setError(null);
       } catch (err) {
-        console.error(err);
+        console.error('Unexpected fetch error:', err.message);
         setError('Unable to load dashboard data. Please try again.');
       } finally {
         setLoading(false);
@@ -69,7 +121,7 @@ const SellerDashboard = () => {
     };
 
     fetchData();
-  }, [user, logout, API_URL]);
+  }, [user, logout, API_URL, navigate]);
 
   const handleViewOrder = (orderId) => navigate(`/seller/order-management/${orderId}`);
   const handleManageProducts = () => navigate('/seller/product-management');
@@ -140,7 +192,9 @@ const SellerDashboard = () => {
                         <td className="p-2 border">{order._id}</td>
                         <td className="p-2 border">{order.customer?.username || 'N/A'}</td>
                         <td className="p-2 border">{order.status}</td>
-                        <td className="p-2 border">${order.total.toFixed(2)}</td>
+                        <td className="p-2 border">
+                          ${order.totalAmount?.toFixed(2) || '0.00'}
+                        </td>
                         <td className="p-2 border">
                           {new Date(order.createdAt).toLocaleDateString()}
                         </td>

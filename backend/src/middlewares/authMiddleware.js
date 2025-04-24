@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-// import errorResponse from '../utils/errorResponse.js';
 import { errorResponse } from '../utils/errorHandler.js';
 
 export const protect = async (req, res, next) => {
@@ -9,9 +8,14 @@ export const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select('-password');
+      const user = await User.findById(decoded.id).select('-password');
+      if (!user) {
+        return errorResponse(res, 401, 'User not found');
+      }
+      req.user = user;
       next();
     } catch (error) {
+      console.error('Token verification error:', error);
       return errorResponse(res, 401, 'Not authorized, token failed');
     }
   } else {
@@ -37,9 +41,18 @@ export const authMiddleware = (req, res, next) => {
 
 export const restrictTo = (...roles) => {
   return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return errorResponse(res, 403, 'Access denied');
+    }
+
+    // console.log('User role:', req.user.role);
+    // console.log('Allowed roles:', roles);   
+
     if (!roles.includes(req.user.role)) {
       return errorResponse(res, 403, 'Access denied');
     }
+
     next();
   };
 };
+

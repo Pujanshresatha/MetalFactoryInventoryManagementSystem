@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, Clock, BarChart, Package, TrendingUp } from 'lucide-react';
-import { useAuth } from '../customer/auth/AuthContext'; 
+import { useAuth } from '../users/auth/AuthContext'; 
 
 const SupervisorDashboard = () => {
   const { user, logout } = useAuth();

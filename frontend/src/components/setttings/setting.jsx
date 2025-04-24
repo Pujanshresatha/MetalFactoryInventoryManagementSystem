@@ -219,7 +219,7 @@ import React, { useState, useContext } from 'react';
 import { Eye, EyeOff, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { AuthContext } from '../customer/auth/AuthContext';
+import { AuthContext } from '../users/auth/AuthContext';
 
 const API = import.meta.env.VITE_API_BASE_URL;
 
